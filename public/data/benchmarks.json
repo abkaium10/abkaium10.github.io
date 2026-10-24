@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-23T20:22:58.137Z",
+  "commitSha": null,
+  "environment": {
+    "runtime": "v22.16.0",
+    "platform": "linux x64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "hardware": "Current local/CI host; values are environment-specific",
+    "notes": "Microbenchmark only; not a browser field measurement or production capacity test."
+  },
+  "breakEven": {
+    "status": "estimated",
+    "operations": 371,
+    "mapSetupMedianMs": 0.6502,
+    "arrayPerOperationMedianMs": 0.00180822,
+    "mapPerOperationMedianMs": 0.00005431,
+    "note": "Approximate estimate from this run; compare only on the same host/runtime."
+  },
+  "methodology": {
+    "clock": "node:perf_hooks performance.now()",
+    "warmupPolicy": "3 unreported warm-up runs per scenario",
+    "sampleCount": 15,
+    "datasetSize": 5000,
+    "limitations": "JIT, CPU load, runtime version and host affect results. Map setup is sampled independently; per-operation cost is median duration divided by operations. Approximate break-even uses these medians and is not a production guarantee."
+  },
+  "results": [
+    {
+      "id": "linear-lookup",
+      "label": "Baseline: linear lookup",
+      "implementation": "Array.find over deterministic in-memory records",
+      "scenario": "Lookup up to 1000 deterministic integer IDs in one in-memory dataset",
+      "datasetSize": 5000,
+      "operationsPerSample": 1000,
+      "unit": "ms",
+      "medianMs": 1.8082,
+      "p95Ms": 17.0493,
+      "sampleCount": 15,
+      "warmupCount": 3,
+      "setupMedianMs": 0,
+      "perOperationMedianMs": 0.00180822,
+      "memoryBytes": 5969728,
+      "measuredAt": "2026-10-23T20:22:58.135Z"
+    },
+    {
+      "id": "indexed-lookup",
+      "label": "Optimized: Map lookup",
+      "implementation": "Map.get over the same deterministic records",
+      "scenario": "Lookup up to 1000 deterministic integer IDs in one in-memory dataset",
+      "datasetSize": 5000,
+      "operationsPerSample": 1000,
+      "unit": "ms",
+      "medianMs": 0.0543,
+      "p95Ms": 0.0912,
+      "sampleCount": 15,
+      "warmupCount": 3,
+      "setupMedianMs": 0.6502,
+      "perOperationMedianMs": 0.00005431,
+      "memoryBytes": 6702912,
+      "measuredAt": "2026-10-23T20:22:58.137Z"
+    }
+  ]
+}

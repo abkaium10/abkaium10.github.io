@@ -1,0 +1,178 @@
+[
+  {
+    "id": "server-components-plain-english",
+    "slug": "server-components-in-plain-english",
+    "date": "2026-09-26",
+    "title": "Server Components in plain English",
+    "excerpt": "What actually runs on the server, and why pages get faster.",
+    "tags": [
+      "Next.js",
+      "React"
+    ],
+    "body": "## The basic idea\n\nA React Server Component is rendered on the server. Its implementation and server-only dependencies do not need to ship to the browser. The browser receives the rendered result, while interactive components can still use client-side JavaScript.\n\n## When it helps\n\nUse Server Components for data-heavy pages, layouts, and content that does not need browser state. Keep a component marked with `use client` only where you need event handlers, state, effects, or browser APIs.\n\n## The trade-off\n\nServer Components are not a magic speed switch. Measure the actual bundle, request waterfall, caching behavior, and user-perceived performance. Keep secrets and database access on the server, and pass only the data the client needs.",
+    "sources": [
+      {
+        "title": "React Server Components",
+        "url": "https://react.dev/reference/rsc/server-components"
+      },
+      {
+        "title": "Next.js Server and Client Components",
+        "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components"
+      }
+    ]
+  },
+  {
+    "id": "paginating-api-right-way",
+    "slug": "paginating-an-api-the-right-way",
+    "date": "2026-09-24",
+    "title": "Paginating an API the right way",
+    "excerpt": "Offset pagination is easy, cursor pagination scales.",
+    "tags": [
+      "API",
+      "PostgreSQL"
+    ],
+    "body": "## Offset pagination\n\n`LIMIT` and `OFFSET` are easy to understand and work well for small, stable result sets. As offsets grow, the database may still need to walk past many rows. Inserts between page requests can also make results shift.\n\n## Cursor pagination\n\nUse a stable, indexed ordering such as `(created_at, id)`. Return an opaque cursor for the last item and query the next page with a matching keyset predicate. The unique tie-breaker prevents ambiguous ordering.\n\n## Practical checklist\n\nValidate page sizes, cap maximum limits, define deterministic ordering, encode cursors safely, and test inserts/deletes between requests. Use offset pagination when its simplicity fits the workload; use cursors when scale and consistency require them.",
+    "sources": [
+      {
+        "title": "PostgreSQL LIMIT and OFFSET",
+        "url": "https://www.postgresql.org/docs/current/queries-limit.html"
+      },
+      {
+        "title": "Stripe API pagination",
+        "url": "https://docs.stripe.com/api/pagination"
+      }
+    ]
+  },
+  {
+    "id": "indexing-postgresql-real-queries",
+    "slug": "indexing-postgresql-for-real-queries",
+    "date": "2026-09-22",
+    "title": "Indexing PostgreSQL for real queries",
+    "excerpt": "Pick indexes from the queries you actually run.",
+    "tags": [
+      "PostgreSQL"
+    ],
+    "body": "## Start with the query\n\nIndexes should support real filters, joins, ordering, and constraints—not a guess about which columns look important. Inspect representative SQL and use `EXPLAIN (ANALYZE, BUFFERS)` in a safe environment.\n\n## Match the access pattern\n\nA composite index can help when its leading columns match common predicates. Partial indexes are useful when queries repeatedly target a subset. An index may also support ordering and avoid a sort.\n\n## Account for write cost\n\nEvery index consumes storage and adds work to inserts, updates, and maintenance. Compare plans and latency before and after, and remove redundant indexes only after checking production-like query patterns.",
+    "sources": [
+      {
+        "title": "PostgreSQL indexes",
+        "url": "https://www.postgresql.org/docs/current/indexes.html"
+      },
+      {
+        "title": "Using EXPLAIN",
+        "url": "https://www.postgresql.org/docs/current/using-explain.html"
+      }
+    ]
+  },
+  {
+    "id": "redis-cache-aside",
+    "slug": "caching-with-redis-cache-aside",
+    "date": "2026-08-20",
+    "title": "Caching with Redis cache-aside",
+    "excerpt": "A tiny pattern that removes most repeated reads.",
+    "tags": [
+      "Redis",
+      "API"
+    ],
+    "body": "## Cache-aside flow\n\nRead the cache first. On a miss, fetch the authoritative database record, cache the result with a bounded TTL, and return it. Updates write to the database and then invalidate or refresh the related key.\n\n## Failure modes\n\nThink about stale data, cache stampedes, negative caching, serialization, and what happens when Redis is unavailable. Add timeouts and ensure a cache failure does not accidentally turn a healthy database into an unbounded request storm.\n\n## Measure before tuning\n\nTrack hit rate, miss latency, eviction rate, and database load. A cache is useful when repeated reads are expensive and the consistency trade-off is acceptable—not simply because Redis is available.",
+    "sources": [
+      {
+        "title": "Redis cache-aside pattern",
+        "url": "https://redis.io/learn/howtos/solutions/microservices/caching"
+      },
+      {
+        "title": "Redis key expiration",
+        "url": "https://redis.io/docs/latest/commands/expire/"
+      }
+    ]
+  },
+  {
+    "id": "validating-input-zod",
+    "slug": "validating-input-with-zod",
+    "date": "2026-08-18",
+    "title": "Validating input with Zod",
+    "excerpt": "Trust nothing that crosses a network boundary.",
+    "tags": [
+      "TypeScript",
+      "API"
+    ],
+    "body": "## Parse at the boundary\n\nTreat form values, query parameters, webhooks, and JSON bodies as untrusted. Define a schema that describes the accepted shape, required fields, bounds, and transformations.\n\n## Return useful errors\n\nUse `safeParse` when invalid input is an expected outcome. Return field-level messages that help the caller fix the request without exposing internal details. Keep authorization checks separate: valid data is not automatically permitted data.\n\n## Share types carefully\n\nInfer TypeScript types from the schema to reduce drift, but do not confuse compile-time types with runtime validation. Add tests for missing fields, unexpected values, boundary values, and maliciously large input.",
+    "sources": [
+      {
+        "title": "Zod documentation",
+        "url": "https://zod.dev/"
+      },
+      {
+        "title": "OWASP Input Validation Cheat Sheet",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html"
+      }
+    ]
+  },
+  {
+    "id": "writing-fast-react-lists",
+    "slug": "writing-fast-react-lists",
+    "date": "2026-08-16",
+    "title": "Writing fast React lists",
+    "excerpt": "Keys, memoisation and when not to bother.",
+    "tags": [
+      "React"
+    ],
+    "body": "## Stable keys first\n\nUse stable IDs as keys so React can match items between renders. Array indexes are risky when items are inserted, removed, filtered, or reordered.\n\n## Measure the bottleneck\n\nA long list may be slow because of expensive rendering, too many DOM nodes, or repeated calculations. Profile before adding `memo`, `useMemo`, or `useCallback`; each has a maintenance and comparison cost.\n\n## Scale the right way\n\nFor very large lists, consider virtualization so only visible rows are mounted. Keep row components focused, avoid unnecessary state updates, and verify improvements with realistic data and React Profiler.",
+    "sources": [
+      {
+        "title": "Rendering Lists",
+        "url": "https://react.dev/learn/rendering-lists"
+      },
+      {
+        "title": "React Developer Tools",
+        "url": "https://react.dev/learn/react-developer-tools"
+      }
+    ]
+  },
+  {
+    "id": "testing-static-site-ci",
+    "slug": "testing-a-static-site-in-ci",
+    "date": "2026-08-14",
+    "title": "Testing a static site in CI",
+    "excerpt": "Make a static export reproducible before deploying it.",
+    "tags": [
+      "Testing",
+      "Docker",
+      "Next.js"
+    ],
+    "body": "## Validate before building\n\nCheck structured content, links, route assumptions, and required configuration before a build begins. Pin the dependency graph with a committed lockfile so local and CI installs resolve the same versions.\n\n## Test the output\n\nA successful compile does not prove that static export routes or asset paths work. Serve the generated `out/` directory and smoke-test deep links, downloads, navigation, and mobile layouts.\n\n## Keep evidence honest\n\nUpload logs and reports as artifacts. Distinguish passed, failed, skipped, and unavailable checks. Never report a browser test or Lighthouse run as successful unless the tool actually executed.",
+    "sources": [
+      {
+        "title": "Next.js static exports",
+        "url": "https://nextjs.org/docs/app/guides/static-exports"
+      },
+      {
+        "title": "GitHub Pages with Next.js",
+        "url": "https://nextjs.org/docs/pages/building-your-application/deploying/static-exports"
+      }
+    ]
+  },
+  {
+    "id": "openapi-contracts-static-playground",
+    "slug": "openapi-contracts-for-a-static-playground",
+    "date": "2026-08-12",
+    "title": "OpenAPI contracts for a static playground",
+    "excerpt": "Explore API contracts without calling a live service.",
+    "tags": [
+      "API",
+      "TypeScript",
+      "Testing"
+    ],
+    "body": "## Describe the contract\n\nOpenAPI documents paths, operations, parameters, request bodies, responses, and schemas in a machine-readable form. It gives client and server teams a shared agreement about expected behavior.\n\n## Keep demos safe\n\nA portfolio playground can simulate request validation and pagination locally without forwarding user input to arbitrary external URLs. Make it clear which responses are mocked and which checks are structural rather than full conformance validation.\n\n## Validate in CI\n\nCheck schema structure, required fields, and examples on every change. For a production API, add a full OpenAPI validator and contract tests against the implementation.",
+    "sources": [
+      {
+        "title": "OpenAPI Specification",
+        "url": "https://spec.openapis.org/oas/latest.html"
+      },
+      {
+        "title": "OWASP API Security",
+        "url": "https://owasp.org/www-project-api-security/"
+      }
+    ]
+  }
+]

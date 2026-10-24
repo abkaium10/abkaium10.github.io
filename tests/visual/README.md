@@ -1,0 +1,3 @@
+# Visual regression tests
+
+Run `npm run build`, serve the exported site with `npm run serve:static`, and run `npm run test:visual` (or `npx playwright test --config=playwright.visual.config.js --update-snapshots` only after reviewing the rendered pages manually). Baselines are intentionally not auto-generated or committed by this change because they have not been reviewed in a browser in this environment. First baseline creation is a human-reviewed action. CI should fail when a reviewed baseline is missing or differs; inspect the Playwright HTML report and screenshot artifacts before approving changes. The suite covers desktop, tablet, and mobile profiles for the home and engineering pages. Animation/transitions are disabled only inside screenshot tests.

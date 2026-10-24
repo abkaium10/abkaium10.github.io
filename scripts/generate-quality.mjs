@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+const file='public/data/quality.json';
+const prior=JSON.parse(fs.readFileSync(file,'utf8'));
+const sha=process.env.GITHUB_SHA||null, now=new Date().toISOString();
+const runUrl = process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID ? `https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : ''; 
+const states=JSON.parse(process.env.QUALITY_CHECK_STATES||'{}');
+const statusOf=(key)=>{const v=states[key];return v==='success'?'pass':v==='failure'?'fail':v==='skipped'?'skipped':v||'unavailable';};
+const checks=prior.checks.map(c=>({ ...c, status: statusOf(c.id), timestamp: statusOf(c.id) !== 'unavailable' ? now : null, commitSha: statusOf(c.id) !== 'unavailable' ? sha : null, summary: statusOf(c.id) === 'pass' ? 'Check completed successfully in this CI run.' : statusOf(c.id) === 'fail' ? 'Check failed in this CI run; inspect workflow logs.' : statusOf(c.id) === 'skipped' ? 'Check was intentionally skipped by workflow conditions.' : 'This check did not run or did not report a result in this workflow; no passing status is inferred.', report: statusOf(c.id) !== 'unavailable' ? runUrl : '' }));
+const report={schemaVersion:1,generatedAt:now,commitSha:sha,summary:'CI-generated report. Unavailable checks are not treated as passing.',checks};
+fs.writeFileSync(file,JSON.stringify(report,null,2)+'\n');
+console.log(`Generated quality report for ${sha||'unknown commit'}; ${checks.filter(c=>c.status==='pass').length} passing checks recorded.`);

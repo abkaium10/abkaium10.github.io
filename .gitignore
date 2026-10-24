@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+public/sitemap.xml
+public/feed.xml
+public/robots.txt
+public/data/build.json
+public/humans.txt
+public/data/github.json
+public/sw-version.js

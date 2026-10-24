@@ -1,0 +1,119 @@
+name: Validate and deploy
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy to GitHub Pages (only allowed from main)'
+        required: false
+        default: 'false'
+        type: boolean
+permissions:
+  contents: read
+concurrency: { group: 'pages-${{ github.ref }}', cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Compute site URL and base path
+        shell: bash
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER}"; REPO="${GITHUB_REPOSITORY#*/}"
+          if [ "${REPO,,}" = "${OWNER,,}.github.io" ]; then
+            echo "NEXT_PUBLIC_BASE_PATH=" >> "$GITHUB_ENV"; echo "NEXT_PUBLIC_SITE_URL=https://${OWNER,,}.github.io" >> "$GITHUB_ENV"
+          else
+            echo "NEXT_PUBLIC_BASE_PATH=/${REPO}" >> "$GITHUB_ENV"; echo "NEXT_PUBLIC_SITE_URL=https://${OWNER,,}.github.io/${REPO}" >> "$GITHUB_ENV"
+          fi
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else echo "::warning::package-lock.json is missing. Run npm install locally and commit it for reproducible builds."; npm install; fi
+      - name: Audit profile, repository and canonical URL configuration
+        run: npm run check-config
+      - name: Validate content
+        id: content
+        run: npm run validate
+      - name: Validate evidence
+        id: evidence
+        run: npm run validate:evidence
+      - name: Validate OpenAPI contract
+        id: openapi
+        run: npm run validate:openapi
+      - name: Run repository security heuristics
+        id: security
+        run: npm run audit:security
+      - name: Run Node.js tests
+        id: unit
+        run: npm test
+      - name: Run benchmark scenarios
+        id: benchmark
+        run: npm run benchmark
+      - name: Production dependency security audit
+        id: audit
+        run: npm audit --audit-level=high
+      - name: Build static export
+        id: build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_FORM_ENDPOINT: ${{ vars.FORM_ENDPOINT }}
+          NEXT_PUBLIC_PLAUSIBLE_DOMAIN: ${{ vars.PLAUSIBLE_DOMAIN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Playwright Chromium
+        id: browserInstall
+        run: npx playwright install --with-deps chromium
+      - name: Browser smoke tests
+        id: browser
+        run: npm run test:e2e -- --grep-invert "accessibility scan"
+      - name: Accessibility scan with axe
+        id: accessibility
+        if: always() && steps.browserInstall.outcome == 'success'
+        run: npm run test:e2e -- --grep "accessibility scan"
+      - name: Validate external project/profile links
+        id: links
+        run: npm run check-links -- --strict
+      - name: Check static export and metadata
+        id: exportcheck
+        run: |
+          test -f out/index.html && test -f out/engineering/index.html && test -f out/engineering/quality/index.html && test -f out/engineering/benchmarks/index.html && test -f out/engineering/api-lab/index.html && test -f out/engineering/system-design/index.html && test -f out/sitemap.xml && test -f out/offline.html
+          grep -q "${NEXT_PUBLIC_SITE_URL}/" out/sitemap.xml
+          node scripts/check-export.mjs
+      - name: Record quality history metadata
+        if: always()
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          QUALITY_HISTORY_CHECKS: '{"unit-tests":"${{ steps.unit.outcome }}","static-build":"${{ steps.build.outcome }}","dependency-audit":"${{ steps.audit.outcome }}","openapi":"${{ steps.openapi.outcome }}","security-heuristics":"${{ steps.security.outcome }}"}'
+        run: node scripts/generate-quality-history.mjs
+      - name: Generate versioned quality report
+        if: always()
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          QUALITY_CHECK_STATES: '{"unit-tests":"${{ steps.unit.outcome }}","browser-smoke":"${{ steps.browser.outcome }}","static-build":"${{ steps.build.outcome }}","accessibility":"${{ steps.accessibility.outcome }}","static-export":"${{ steps.exportcheck.outcome }}","seo-links":"${{ steps.links.outcome }}","dependency-audit":"${{ steps.audit.outcome }}","openapi-contract":"${{ steps.openapi.outcome }}","security-heuristics":"${{ steps.security.outcome }}"}'
+        run: |
+          node scripts/generate-quality.mjs
+          if [ -d out/data ]; then cp public/data/quality.json out/data/quality.json; cp public/data/quality-history.json out/data/quality-history.json; cp public/data/security-report.json out/data/security-report.json; fi
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && success()
+        uses: actions/upload-pages-artifact@v3
+        with: { path: out }
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: { pages: write, id-token: write }
+    environment: { name: github-pages, url: '${{ steps.d.outputs.page_url }}' }
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,36 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "validate": "node scripts/validate-content.mjs",
+    "test": "node --test",
+    "prebuild": "node scripts/generate-cv-status.mjs && node scripts/validate-content.mjs && node scripts/validate-evidence.mjs && node scripts/generate-seo.mjs && node scripts/generate-facts.mjs && node scripts/generate-github.mjs",
+    "check-export": "node scripts/check-export.mjs",
+    "check-links": "node scripts/validate-links.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "validate:evidence": "node scripts/validate-evidence.mjs",
+    "benchmark": "node scripts/run-benchmarks.mjs",
+    "test:e2e": "playwright test",
+    "serve:static": "node scripts/serve-static.mjs",
+    "check-config": "node scripts/check-config.mjs",
+    "audit:security": "node scripts/security-audit.mjs",
+    "validate:openapi": "node scripts/validate-openapi.mjs",
+    "quality:history": "node scripts/compare-quality-history.mjs",
+    "quality:history:generate": "node scripts/generate-quality-history.mjs",
+    "test:visual": "playwright test --config=playwright.visual.config.js",
+    "test:unit": "node --test"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@supabase/supabase-js": "^2.57.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@axe-core/playwright": "^4.10.2"
+  }
+}

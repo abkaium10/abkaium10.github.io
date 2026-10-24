@@ -1,0 +1,59 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Portfolio Example API Contract",
+    "version": "1.0.0",
+    "summary": "Static demonstration contract; no live API is provided.",
+    "description": "Illustrative API contract for a portfolio project catalog. Requests are examples only and are not sent to a production service."
+  },
+  "servers": [{ "url": "https://example.invalid/mock", "description": "Reserved non-routable placeholder; not a live server" }],
+  "tags": [{ "name": "Projects" }],
+  "paths": {
+    "/projects": {
+      "get": {
+        "operationId": "listProjects",
+        "summary": "List projects with pagination",
+        "tags": ["Projects"],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 10 } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["title", "-title", "updatedAt", "-updatedAt"] } },
+          { "name": "X-API-Version", "in": "header", "schema": { "type": "string", "default": "2026-01" }, "deprecated": false }
+        ],
+        "responses": {
+          "200": { "description": "A page of projects", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProjectPage" }, "example": { "data": [{ "id": "sample-1", "title": "Example project" }], "page": 1, "limit": 10, "total": 1 } } } },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      },
+      "post": {
+        "operationId": "createProject",
+        "summary": "Create project (mock only)",
+        "tags": ["Projects"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProjectInput" }, "example": { "title": "Example project", "description": "Contract-only example" } } } },
+        "responses": { "201": { "description": "Mock project created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Project" } } } }, "422": { "$ref": "#/components/responses/ValidationError" }, "429": { "$ref": "#/components/responses/RateLimited" } }
+      }
+    },
+    "/projects/{projectId}": {
+      "parameters": [{ "name": "projectId", "in": "path", "required": true, "schema": { "type": "string", "minLength": 1 } }],
+      "get": { "operationId": "getProject", "summary": "Fetch one project", "tags": ["Projects"], "responses": { "200": { "description": "Project found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Project" } } } }, "404": { "$ref": "#/components/responses/NotFound" } } },
+      "patch": { "operationId": "updateProject", "summary": "Update project (mock only)", "tags": ["Projects"], "deprecated": false, "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProjectInput" } } } }, "responses": { "200": { "description": "Updated mock representation" }, "409": { "$ref": "#/components/responses/Conflict" } } },
+      "delete": { "operationId": "deleteProject", "summary": "Delete project (mock only)", "tags": ["Projects"], "deprecated": true, "description": "Demonstrates deprecation; use an archive operation in a real versioned API.", "responses": { "204": { "description": "Deleted in local simulation only" }, "404": { "$ref": "#/components/responses/NotFound" } } }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Project": { "type": "object", "required": ["id", "title"], "properties": { "id": { "type": "string" }, "title": { "type": "string", "minLength": 1, "maxLength": 120 }, "description": { "type": "string", "maxLength": 2000 } }, "additionalProperties": false },
+      "ProjectInput": { "type": "object", "required": ["title"], "properties": { "title": { "type": "string", "minLength": 1, "maxLength": 120 }, "description": { "type": "string", "maxLength": 2000 } }, "additionalProperties": false },
+      "ProjectPage": { "type": "object", "required": ["data", "page", "limit", "total"], "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Project" } }, "page": { "type": "integer", "minimum": 1 }, "limit": { "type": "integer", "minimum": 1 }, "total": { "type": "integer", "minimum": 0 } }, "additionalProperties": false },
+      "Error": { "type": "object", "required": ["error", "message"], "properties": { "error": { "type": "string" }, "message": { "type": "string" }, "requestId": { "type": "string" } }, "additionalProperties": false }
+    },
+    "responses": {
+      "BadRequest": { "description": "Malformed request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "BAD_REQUEST", "message": "Query parameter is invalid" } } } },
+      "NotFound": { "description": "Resource not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "ValidationError": { "description": "Payload validation failed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "VALIDATION_ERROR", "message": "title is required" } } } },
+      "Conflict": { "description": "Resource version conflict", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "RateLimited": { "description": "Rate limit exceeded", "headers": { "Retry-After": { "schema": { "type": "integer", "minimum": 1 } } }, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" }, "example": { "error": "RATE_LIMITED", "message": "Retry later" } } } }
+    }
+  }
+}

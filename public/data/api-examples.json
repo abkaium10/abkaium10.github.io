@@ -1,0 +1,92 @@
+[
+  {
+    "id": "list-projects",
+    "title": "List projects",
+    "method": "GET",
+    "path": "/api/projects",
+    "description": "Paginated, filterable local mock endpoint.",
+    "query": {
+      "page": "1",
+      "limit": "2",
+      "q": "",
+      "sort": "title"
+    },
+    "headers": {
+      "accept": "application/json"
+    },
+    "body": null,
+    "identity": "anonymous"
+  },
+  {
+    "id": "create-project",
+    "title": "Create project",
+    "method": "POST",
+    "path": "/api/projects",
+    "description": "Validates a project payload; no data is persisted.",
+    "query": {},
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "title": "Example project",
+      "tech": "Next.js, Node.js"
+    },
+    "identity": "editor"
+  },
+  {
+    "id": "patch-project",
+    "title": "Update project",
+    "method": "PATCH",
+    "path": "/api/projects/1",
+    "description": "Requires editor mock identity and a non-empty patch.",
+    "query": {},
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "title": "Updated example"
+    },
+    "identity": "editor"
+  },
+  {
+    "id": "delete-project",
+    "title": "Delete project",
+    "method": "DELETE",
+    "path": "/api/projects/1",
+    "description": "Requires admin mock identity; deletion is simulated only.",
+    "query": {},
+    "headers": {},
+    "body": null,
+    "identity": "admin"
+  },
+  {
+    "id": "rate-limit",
+    "title": "Simulated rate limit",
+    "method": "GET",
+    "path": "/api/projects",
+    "description": "Trigger a controlled mock HTTP 429 response.",
+    "query": {
+      "simulate": "rate-limit"
+    },
+    "headers": {
+      "accept": "application/json"
+    },
+    "body": null,
+    "identity": "anonymous"
+  },
+  {
+    "id": "server-error",
+    "title": "Simulated server error",
+    "method": "GET",
+    "path": "/api/projects",
+    "description": "Trigger a controlled mock HTTP 503 response.",
+    "query": {
+      "simulate": "server-error"
+    },
+    "headers": {
+      "accept": "application/json"
+    },
+    "body": null,
+    "identity": "anonymous"
+  }
+]

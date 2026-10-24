@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-23T20:22:58.264Z",
+  "scope": "Heuristic repository configuration scan; not a complete secret scanner or security certification.",
+  "dependencies": 3,
+  "devDependencies": 2,
+  "findings": [
+    {
+      "severity": "blocked",
+      "id": "lockfile-missing",
+      "message": "package-lock.json is missing; npm ci cannot provide a reproducible install."
+    },
+    {
+      "severity": "review",
+      "id": "mutable-action-tag",
+      "file": "deploy.yml",
+      "message": "One or more actions use mutable version tags rather than immutable commit SHAs."
+    },
+    {
+      "severity": "review",
+      "id": "mutable-action-tag",
+      "file": "performance.yml",
+      "message": "One or more actions use mutable version tags rather than immutable commit SHAs."
+    }
+  ]
+}

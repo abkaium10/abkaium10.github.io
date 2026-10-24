@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": null,
+  "commitSha": null,
+  "summary": "No CI-generated quality report has been published yet. Results are unavailable until checks run in GitHub Actions.",
+  "checks": [
+    {
+      "id": "unit-tests",
+      "tool": "node --test",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Waiting for a CI run.",
+      "report": ""
+    },
+    {
+      "id": "browser-smoke",
+      "tool": "Playwright",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Browser smoke tests have not run.",
+      "report": ""
+    },
+    {
+      "id": "accessibility",
+      "tool": "axe-core",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Automated accessibility results are not available yet.",
+      "report": ""
+    },
+    {
+      "id": "static-build",
+      "tool": "Next.js production build",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Waiting for a CI build.",
+      "report": ""
+    },
+    {
+      "id": "static-export",
+      "tool": "Next.js static export",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Waiting for export validation.",
+      "report": ""
+    },
+    {
+      "id": "seo-links",
+      "tool": "Export and link validators",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Waiting for validation.",
+      "report": ""
+    },
+    {
+      "id": "dependency-audit",
+      "tool": "npm audit",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Waiting for dependency audit.",
+      "report": ""
+    },
+    {
+      "id": "openapi-contract",
+      "tool": "Repository OpenAPI structural validator",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "OpenAPI validation has not yet reported a CI result.",
+      "report": ""
+    },
+    {
+      "id": "security-heuristics",
+      "tool": "Repository security heuristic scan",
+      "status": "unavailable",
+      "timestamp": null,
+      "commitSha": null,
+      "summary": "Heuristic scan status is not yet recorded by CI.",
+      "report": ""
+    }
+  ]
+}

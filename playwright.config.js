@@ -1,0 +1,2 @@
+const { defineConfig } = require('@playwright/test');
+module.exports = defineConfig({ testDir: './e2e', fullyParallel: true, reporter: [['list'], ['json', { outputFile: 'test-results/playwright-report.json' }]], use: { baseURL: `http://127.0.0.1:4173${process.env.NEXT_PUBLIC_BASE_PATH || ''}`, trace: 'retain-on-failure' }, webServer: { command: 'npm run serve:static', url: 'http://127.0.0.1:4173', reuseExistingServer: !process.env.CI, timeout: 30000 }, });
